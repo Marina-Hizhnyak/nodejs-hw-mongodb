@@ -1,10 +1,10 @@
 import { Contact } from '../models/contact.js';
 
-export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter }) {
+export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter, userId }) {
   const skip = page > 0 ? (page - 1) * perPage : 0;
 
 
-  const dbFilter = {};
+  const dbFilter = { userId };
   if (typeof filter?.isFavourite === 'boolean') {
     dbFilter.isFavourite = filter.isFavourite;
   }
@@ -32,12 +32,19 @@ export async function getContactById(id) {
   return contact;
 }
 
-export async function createContact(payload) {
-  const contact = await Contact.create(payload);
+export async function createContact(payload, userId) {
+  const contact = await Contact.create({ ...payload, userId });
   return contact;
 }
 
 export const updateContact = async (contactId, payload, options = {}) => {
+
+  const { userId, ...queryOptions } = options;
+
+  if ('userId' in payload) delete payload.userId;
+
+  const filter = userId ? { _id: contactId, userId } : { _id: contactId };
+
   const rawResult = await Contact.findOneAndUpdate(
     { _id: contactId },
     payload,
@@ -56,10 +63,8 @@ export const updateContact = async (contactId, payload, options = {}) => {
   };
 };
 
-export const deleteContact = async (contactId) => {
-  const contact = await Contact.findOneAndDelete({
-    _id: contactId,
-  });
+export const deleteContact = async (contactId, userId) => {
+  const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
 
   return contact;
 };
