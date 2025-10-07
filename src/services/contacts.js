@@ -27,8 +27,8 @@ export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter,
     hasPreviousPage: page > 1,
   };
 }
-export async function getContactById(id) {
-  const contact = await Contact.findById(id);
+export async function getContactById(id, userId) {
+  const contact = await Contact.findOne({ _id: id, userId });
   return contact;
 }
 
