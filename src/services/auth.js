@@ -1,8 +1,21 @@
+import * as fs from 'node:fs';
+import path from 'node:path';
 import createHttpError from "http-errors";
-import { User } from "../models/user.js";
+import jwt from 'jsonwebtoken';
+import Handlebars from 'handlebars';
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
+import { User } from "../models/user.js";
 import { Session } from "../models/session.js";
+import { sendMail } from '../utils/sendMail.js';
+import { getEnvVariable } from '../utils/getEnvVariable.js';
+
+
+const REQUEST_PASSWORD_RESET_TEMPLATE = fs.readFileSync(
+  path.resolve('src/templates/request-password-reset.html'),
+  { encoding: 'UTF-8' },
+);
+
 
 export async function registerUser(payload) {
   const user = await User.findOne({ email: payload.email });
@@ -66,4 +79,46 @@ export async function refreshSession(sessionId, refreshToken) {
 
 export async function logoutUser(sessionId) {
   await Session.deleteOne({ _id: sessionId });
+}
+
+export async function requestPasswordReset(email) {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const token = jwt.sign({ sub: user._id }, getEnvVariable('JWT_SECRET'), {
+    expiresIn: '15m',
+  });
+
+  const template = Handlebars.compile(REQUEST_PASSWORD_RESET_TEMPLATE);
+
+  await sendMail({
+    to: email,
+    subject: 'Reset password instruction',
+    html: template({
+      resetPasswordLink: `http://localhost:3000/reset-password?token=${token}`,
+    }),
+  });
+}
+
+export async function resetPassword(token, password) {
+  try {
+    const decoded = jwt.verify(token, getEnvVariable('JWT_SECRET'));
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.findByIdAndUpdate(decoded.sub, { password: hashedPassword });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      throw createHttpError.Unauthorized('Token is expired');
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+      throw createHttpError.Unauthorized('Token is unauthorized');
+    }
+
+    throw error;
+  }
 }
