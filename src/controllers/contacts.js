@@ -49,7 +49,7 @@ export async function createContactController(req, res) {
     await fs.unlink(req.file.path);
     photo = response.secure_url;
   } else {
-    await fs.rename(req.file.path, path.resolve("src/uploads/photos", (req.file.filename)));
+    await fs.rename(req.file.path, path.resolve('src/uploads/photos', req.file.filename));
     photo = `http://localhost:3001/photos/${req.file.filename}`;
   }
   const payload = { ...req.body, photo };
