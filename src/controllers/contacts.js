@@ -1,8 +1,12 @@
 import createHttpError from 'http-errors';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
 import { createContact, deleteContact, getAllContacts, getContactById, updateContact } from '../services/contacts.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { getEnvVariable } from '../utils/getEnvVariable.js';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 export async function getContactsController(req, res) {
 
@@ -37,7 +41,20 @@ export async function getContactByIdController(req, res) {
 }
 
 export async function createContactController(req, res) {
-  const contact = await createContact(req.body, req.user.id);
+  let photo;
+
+  if (getEnvVariable("UPLOAD_CLOUDINARY") === "true") {
+
+    const response = await uploadToCloudinary(req.file.path);
+    await fs.unlink(req.file.path);
+    photo = response.secure_url;
+  } else {
+    await fs.rename(req.file.path, path.resolve("src/uploads/photos", (req.file.filename)));
+    photo = `http://localhost:3001/photos/${req.file.filename}`;
+  }
+  const payload = { ...req.body, photo };
+  const contact = await createContact(payload, req.user.id);
+
   res.status(201).json({
     status: 201,
     message: `Successfully created a contact!`,

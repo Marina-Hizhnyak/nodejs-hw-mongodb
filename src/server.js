@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
+import path from 'node:path';
 import { notFoundHandler } from "./middlewares/notFoundHandler.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import contactsRoutes from "./routes/contacts.js";
@@ -16,6 +17,8 @@ export function setupServer() {
   app.use(cookieParser());
   app.use(cors());
   app.use(pino());
+
+  app.use("/photos", express.static(path.resolve("src", "uploads", "photos")));
 
   app.use("/contacts", auth, contactsRoutes);
   app.use("/auth", authRoutes);
