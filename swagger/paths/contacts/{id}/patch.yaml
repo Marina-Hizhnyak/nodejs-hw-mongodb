@@ -1,0 +1,66 @@
+tags:
+  - Contacts
+summary: Update contact
+operationId: updateContact
+description: Partially update contact by id
+security:
+  - bearerAuth: []
+
+parameters:
+  - in: path
+    name: id
+    required: true
+    schema:
+      type: string
+      pattern: '^[a-fA-F0-9]{24}$'
+      example: 68efd41636a23320bb4ef586
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: ../../../components/schemas/contact.yaml
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name: { type: string, example: 'John Doe' }
+          email: { type: string, format: email, example: 'john@example.com' }
+          phoneNumber: { type: string, example: '+324012345667' }
+          isFavourite: { type: boolean, example: true }
+          contactType: { type: string, example: 'work' }
+          photo:
+            type: string
+            format: binary
+            description: New contact photo to upload
+
+responses:
+  '200':
+    description: Successfully updated contact
+    content:
+      application/json:
+        schema:
+          type: object
+          required: [status, message, data]
+          properties:
+            status: { type: integer, example: 200 }
+            message: { type: string, example: 'Contact updated' }
+            data:
+              $ref: ../../../components/schemas/contact.yaml
+  '400':
+    $ref: ../../../components/responses/400.yaml
+  '401':
+    $ref: ../../../components/responses/401.yaml
+  '404':
+    description: Contact not found
+    content:
+      application/json:
+        schema:
+          type: object
+          required: [status, message]
+          properties:
+            status: { type: integer, example: 404 }
+            message: { type: string, example: 'Contact not found' }
+  '500':
+    $ref: ../../../components/responses/500.yaml
