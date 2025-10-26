@@ -20,19 +20,29 @@ requestBody:
           name:
             type: string
             description: Contact name
-            example: John Deere
+            example: John Doe
+          email:
+            type: string
+            format: email
+            description: Contact email
+            example: john@example.com
           phoneNumber:
             type: string
             description: Contact phone number
             example: +324012345667
+          isFavourite:
+            type: boolean
+            description: Whether contact is marked as favourite
+            example: false
           contactType:
             type: string
-            description: Contact type
-            example: work
-          userId:
+            description: Type of contact
+            enum: [personal, work]
+            example: personal
+          photo:
             type: string
-            description: Contact owner id
-            example: 68efd834f1781f960b1e7a6c
+            format: binary
+            description: Contact photo to upload
 responses:
   '201':
     description: Contact created successfully
@@ -52,7 +62,7 @@ responses:
               type: string
               example: Contact created successfully
             data:
-              $ref: ../../components/schemas/contact.yaml
+              $ref: ../../components/schemas/contactPost.yaml
   '400':
     $ref: ../../components/responses/400.yaml
   '401':

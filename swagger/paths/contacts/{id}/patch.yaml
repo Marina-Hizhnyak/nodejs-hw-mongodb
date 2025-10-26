@@ -18,9 +18,6 @@ parameters:
 requestBody:
   required: true
   content:
-    application/json:
-      schema:
-        $ref: ../../../components/schemas/contact.yaml
     multipart/form-data:
       schema:
         type: object
@@ -47,7 +44,7 @@ responses:
             status: { type: integer, example: 200 }
             message: { type: string, example: 'Contact updated' }
             data:
-              $ref: ../../../components/schemas/contact.yaml
+              $ref: ../../../components/schemas/contactPatch.yaml
   '400':
     $ref: ../../../components/responses/400.yaml
   '401':
