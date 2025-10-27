@@ -226,11 +226,6 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/contact"
-              }
-            },
             "multipart/form-data": {
               "schema": {
                 "type": "object",
@@ -249,7 +244,18 @@
                     "example": "+324012345667"
                   },
                   "isFavourite": {
-                    "type": "boolean",
+                    "oneOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "true",
+                          "false"
+                        ]
+                      }
+                    ],
                     "example": true
                   },
                   "contactType": {
@@ -261,7 +267,8 @@
                     "format": "binary",
                     "description": "New contact photo to upload"
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }
@@ -500,29 +507,43 @@
                 "required": [
                   "name",
                   "phoneNumber",
-                  "contactType",
-                  "userId"
+                  "contactType"
                 ],
                 "properties": {
                   "name": {
                     "type": "string",
                     "description": "Contact name",
-                    "example": "John Deere"
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Contact email",
+                    "example": "john@example.com"
                   },
                   "phoneNumber": {
                     "type": "string",
                     "description": "Contact phone number",
                     "example": 324012345667
                   },
+                  "isFavourite": {
+                    "type": "boolean",
+                    "description": "Whether contact is marked as favourite",
+                    "example": false
+                  },
                   "contactType": {
                     "type": "string",
-                    "description": "Contact type",
-                    "example": "work"
+                    "description": "Type of contact",
+                    "enum": [
+                      "personal",
+                      "work"
+                    ],
+                    "example": "personal"
                   },
-                  "userId": {
+                  "photo": {
                     "type": "string",
-                    "description": "Contact owner id",
-                    "example": "68efd834f1781f960b1e7a6c"
+                    "format": "binary",
+                    "description": "Contact photo to upload"
                   }
                 }
               }
@@ -544,7 +565,7 @@
                   "properties": {
                     "status": {
                       "type": "integer",
-                      "example": 200
+                      "example": 201
                     },
                     "message": {
                       "type": "string",
@@ -597,7 +618,8 @@
           "_id": {
             "type": "string",
             "description": "Contact id",
-            "example": "68efd41636a23320bb4ef586"
+            "example": "68efd41636a23320bb4ef586",
+            "readOnly": true
           },
           "name": {
             "type": "string",
@@ -607,49 +629,52 @@
           "phoneNumber": {
             "type": "string",
             "description": "Contact phone number",
-            "example": 324012345667
+            "example": "+324012345667"
           },
           "email": {
             "type": "string",
+            "format": "email",
             "description": "Contact email",
             "example": "123@gmail.com"
           },
           "isFavourite": {
             "type": "boolean",
-            "default": false,
             "description": "Contact is favourite",
             "example": true
           },
           "contactType": {
             "type": "string",
             "description": "Type of contact",
-            "default": "personal",
-            "example": "work"
+            "example": "work",
+            "default": "personal"
           },
           "photo": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Contact photo",
-            "example": "https://res.cloudinary.com/dhu1d3tbu/image/upload/v1760732861/tu48nwwlwfaf0he8jpjw.jpg"
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Public URL of the contact photo",
+            "example": "https://res.cloudinary.com/.../image.jpg"
           },
           "userId": {
             "type": "string",
             "description": "Contact owner id",
-            "example": "68efd834f1781f960b1e7a6c"
+            "example": "68efd834f1781f960b1e7a6c",
+            "readOnly": true
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2025-10-08T18:21:10.157+00:00"
+            "example": "2025-10-08T18:21:10.157Z",
+            "readOnly": true
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2025-10-08T18:21:10.157+00:00"
+            "example": "2025-10-08T18:21:10.157Z",
+            "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "responses": {

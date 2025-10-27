@@ -15,7 +15,6 @@ requestBody:
           - name
           - phoneNumber
           - contactType
-          - userId
         properties:
           name:
             type: string
@@ -57,12 +56,12 @@ responses:
           properties:
             status:
               type: integer
-              example: 200
+              example: 201
             message:
               type: string
               example: Contact created successfully
             data:
-              $ref: ../../components/schemas/contactPost.yaml
+              $ref: ../../components/schemas/contact.yaml
   '400':
     $ref: ../../components/responses/400.yaml
   '401':
